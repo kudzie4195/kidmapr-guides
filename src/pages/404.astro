@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Page not found | CloverMap Guides"
+  description="We couldn't find that guide. Browse the CloverMap Guide Library for free Georgia family resources."
+  noIndex={true}
+>
+  <!-- ─── Site Header ───────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="/guides/" class="flex items-center gap-2 font-semibold text-slate-900 hover:text-clover-600 transition-colors">
+        <span aria-hidden="true">🍀</span>
+        <span><strong>CloverMap</strong> <span class="font-normal text-slate-500">Guide Library</span></span>
+      </a>
+      <a
+        href="https://www.clovermap.com"
+        class="text-sm text-slate-600 hover:text-clover-600 transition-colors flex items-center gap-1"
+      >
+        <span aria-hidden="true">←</span> Back to CloverMap
+      </a>
+    </div>
+  </header>
+
+  <!-- ─── 404 Body ───────────────────────────────────────────────────── -->
+  <main class="min-h-[calc(100vh-56px)] flex items-center justify-center px-4 py-20">
+    <div class="text-center max-w-md">
+      <!-- Large 404 -->
+      <p class="text-8xl font-extrabold text-slate-200 leading-none select-none mb-6" aria-hidden="true">
+        404
+      </p>
+
+      <h1 class="text-2xl font-bold text-slate-900 mb-3">
+        We couldn't find that guide.
+      </h1>
+      <p class="text-slate-500 mb-10">
+        The page you're looking for may have moved, or the URL might be
+        incorrect. Try the guide library or search for a daycare near you.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a
+          href="/guides/"
+          class="inline-flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-sm w-full sm:w-auto justify-center"
+        >
+          <span aria-hidden="true">📚</span> Browse the guide library
+        </a>
+        <a
+          href="https://www.clovermap.com/Browse"
+          class="inline-flex items-center gap-2 bg-white text-clover-700 border border-clover-200 font-semibold px-6 py-3 rounded-xl hover:bg-clover-50 transition-colors shadow-sm w-full sm:w-auto justify-center"
+        >
+          <span aria-hidden="true">🍀</span> Search daycares
+        </a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

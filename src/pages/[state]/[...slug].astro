@@ -1,0 +1,67 @@
+---
+import { getCollection } from 'astro:content';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides', ({ data }) => !data.draft);
+  return guides.map(guide => {
+    // guide.slug is like 'georgia/after-prek'
+    const parts = guide.slug.split('/');
+    const state = parts[0];
+    const slug  = parts.slice(1).join('/');
+    return {
+      params: { state, slug },
+      props: { guide },
+    };
+  });
+}
+
+const { guide } = Astro.props;
+const { Content } = await guide.render();
+const {
+  title,
+  description,
+  state,
+  stateLabel,
+  icon,
+  timeEstimate,
+  lastUpdated,
+  isFree,
+  category,
+  relatedGuides,
+  faq,
+  howToSteps,
+} = guide.data;
+
+// Build related guide objects for sidebar
+const allGuides = await getCollection('guides', ({ data }) => !data.draft);
+const related = relatedGuides
+  ? allGuides.filter(g =>
+      relatedGuides.some(r => g.slug.endsWith(r) || g.slug === r)
+    )
+  : [];
+
+const canonical = new URL(`/guides/${guide.slug}`, 'https://www.clovermap.com').toString();
+---
+
+<GuideLayout
+  title={title}
+  description={description}
+  state={state}
+  stateLabel={stateLabel}
+  icon={icon}
+  timeEstimate={timeEstimate}
+  lastUpdated={lastUpdated}
+  isFree={isFree}
+  category={category}
+  relatedGuides={related.map(g => ({
+    title: g.data.title,
+    href:  `/guides/${g.slug}`,
+    icon:  g.data.icon,
+  }))}
+  faq={faq}
+  howToSteps={howToSteps}
+  canonical={canonical}
+>
+  <Content />
+</GuideLayout>

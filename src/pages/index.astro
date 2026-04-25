@@ -1,0 +1,231 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allGuides = await getCollection('guides', ({ data }) => !data.draft);
+
+// Group by category
+const byCategory = {
+  childcare:   allGuides.filter(g => g.data.category === 'childcare'),
+  kTransition: allGuides.filter(g => g.data.category === 'k-transition'),
+  financial:   allGuides.filter(g => g.data.category === 'financial'),
+  provider:    allGuides.filter(g => g.data.category === 'provider'),
+};
+
+// Group by state for the state selector
+const states = [...new Set(allGuides.map(g => g.data.state))];
+
+// Helper: resolve a guide's public URL slug
+function guideHref(guide: (typeof allGuides)[number]) {
+  const parts = guide.slug.split('/');
+  const state = parts[0];
+  const slug  = parts.slice(1).join('/');
+  return `/guides/${state}/${slug}`;
+}
+---
+
+<BaseLayout
+  title="CloverMap Guide Library | Georgia Family Resources"
+  description="Free, Georgia-specific guides for families — from finding infant care to navigating kindergarten enrollment. No ads, no fluff."
+>
+  <!-- ─── Site Header ───────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="/guides/" class="flex items-center gap-2 font-semibold text-slate-900 hover:text-clover-600 transition-colors">
+        <span aria-hidden="true">🍀</span>
+        <span><strong>CloverMap</strong> <span class="font-normal text-slate-500">Guide Library</span></span>
+      </a>
+      <a
+        href="https://www.clovermap.com"
+        class="text-sm text-slate-600 hover:text-clover-600 transition-colors flex items-center gap-1"
+      >
+        <span aria-hidden="true">←</span> Back to CloverMap
+      </a>
+    </div>
+  </header>
+
+  <!-- ─── Hero ──────────────────────────────────────────────────────── -->
+  <section class="bg-gradient-to-br from-indigo-900 to-indigo-800 text-white py-14 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-5">
+        <span aria-hidden="true">🍀</span> CloverMap Guide Library
+      </div>
+
+      <!-- Headline -->
+      <h1 class="text-3xl font-bold leading-tight mb-4">
+        Everything Georgia families need to know
+      </h1>
+      <p class="text-indigo-200 text-lg max-w-xl mx-auto mb-8">
+        Free, Georgia-specific guides — from finding infant care to navigating
+        kindergarten. No ads, no fluff.
+      </p>
+
+      <!-- State selector pill (static for now, expandable later) -->
+      <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white text-sm font-medium px-5 py-2 rounded-full cursor-default select-none">
+        Viewing: <span class="font-semibold">Georgia</span>
+        <span aria-hidden="true" class="text-indigo-300">▾</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Main Content ───────────────────────────────────────────────── -->
+  <main class="max-w-6xl mx-auto px-4 py-14 space-y-16">
+
+    <!-- Section A: Finding childcare (ages 0–5) -->
+    {(byCategory.childcare.length > 0 || byCategory.financial.length > 0) && (
+      <section>
+        <!-- Section header -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-2xl" aria-hidden="true">🍼</span>
+            <h2 class="text-xl font-bold text-slate-900">Finding childcare</h2>
+            <span class="text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">Ages 0–5</span>
+          </div>
+          <p class="text-slate-500 ml-9">
+            Infant care, CAPS subsidy, Pre-K enrollment, and what daycare actually costs.
+          </p>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[...byCategory.childcare, ...byCategory.financial].map(guide => (
+            <a
+              href={guideHref(guide)}
+              class="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 p-6 flex flex-col gap-3"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <span class="text-2xl leading-none" aria-hidden="true">{guide.data.icon}</span>
+                {guide.data.isFree && (
+                  <span class="text-xs font-medium text-clover-600 bg-clover-50 border border-clover-100 px-2 py-0.5 rounded-full shrink-0">Free</span>
+                )}
+              </div>
+              <h3 class="font-semibold text-slate-900 leading-snug group-hover:text-indigo-700 transition-colors">
+                {guide.data.title}
+              </h3>
+              <p class="text-sm text-slate-500 line-clamp-2 flex-1">{guide.data.description}</p>
+              <div class="flex items-center justify-between mt-1">
+                <span class="text-xs text-slate-400">{guide.data.timeEstimate}</span>
+                <span class="text-sm font-medium text-indigo-600 group-hover:translate-x-0.5 transition-transform">Open →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Section B: Planning for kindergarten (ages 4–6) -->
+    {byCategory.kTransition.length > 0 && (
+      <section>
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-2xl" aria-hidden="true">🎒</span>
+            <h2 class="text-xl font-bold text-slate-900">Planning for school</h2>
+            <span class="text-xs font-medium text-amber-600 bg-amber-50 border border-amber-100 px-2.5 py-0.5 rounded-full">Ages 4–6</span>
+          </div>
+          <p class="text-slate-500 ml-9">
+            Public school registration, charter lotteries, GOAL scholarships, and kindergarten readiness.
+          </p>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {byCategory.kTransition.map(guide => (
+            <a
+              href={guideHref(guide)}
+              class="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-200 p-6 flex flex-col gap-3"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <span class="text-2xl leading-none" aria-hidden="true">{guide.data.icon}</span>
+                {guide.data.isFree && (
+                  <span class="text-xs font-medium text-clover-600 bg-clover-50 border border-clover-100 px-2 py-0.5 rounded-full shrink-0">Free</span>
+                )}
+              </div>
+              <h3 class="font-semibold text-slate-900 leading-snug group-hover:text-amber-700 transition-colors">
+                {guide.data.title}
+              </h3>
+              <p class="text-sm text-slate-500 line-clamp-2 flex-1">{guide.data.description}</p>
+              <div class="flex items-center justify-between mt-1">
+                <span class="text-xs text-slate-400">{guide.data.timeEstimate}</span>
+                <span class="text-sm font-medium text-amber-600 group-hover:translate-x-0.5 transition-transform">Open →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Section C: For childcare providers (conditional) -->
+    {byCategory.provider.length > 0 && (
+      <section>
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-2xl" aria-hidden="true">🏫</span>
+            <h2 class="text-xl font-bold text-slate-900">For providers</h2>
+            <span class="text-xs font-medium text-violet-600 bg-violet-50 border border-violet-100 px-2.5 py-0.5 rounded-full">Providers</span>
+          </div>
+          <p class="text-slate-500 ml-9">
+            DECAL licensing, CAPS enrollment, CACFP food program, and staff management.
+          </p>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {byCategory.provider.map(guide => (
+            <a
+              href={guideHref(guide)}
+              class="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-violet-200 transition-all duration-200 p-6 flex flex-col gap-3"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <span class="text-2xl leading-none" aria-hidden="true">{guide.data.icon}</span>
+                {guide.data.isFree && (
+                  <span class="text-xs font-medium text-clover-600 bg-clover-50 border border-clover-100 px-2 py-0.5 rounded-full shrink-0">Free</span>
+                )}
+              </div>
+              <h3 class="font-semibold text-slate-900 leading-snug group-hover:text-violet-700 transition-colors">
+                {guide.data.title}
+              </h3>
+              <p class="text-sm text-slate-500 line-clamp-2 flex-1">{guide.data.description}</p>
+              <div class="flex items-center justify-between mt-1">
+                <span class="text-xs text-slate-400">{guide.data.timeEstimate}</span>
+                <span class="text-sm font-medium text-violet-600 group-hover:translate-x-0.5 transition-transform">Open →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Empty state: no guides published yet -->
+    {allGuides.length === 0 && (
+      <div class="text-center py-24 text-slate-400">
+        <p class="text-4xl mb-4" aria-hidden="true">📚</p>
+        <p class="text-lg font-medium">Guides coming soon.</p>
+        <p class="text-sm mt-1">Check back shortly — we're publishing new content weekly.</p>
+      </div>
+    )}
+  </main>
+
+  <!-- ─── Bottom CTA ─────────────────────────────────────────────────── -->
+  <section class="bg-clover-600 text-white">
+    <div class="max-w-4xl mx-auto px-4 py-12 text-center">
+      <p class="text-lg font-semibold mb-1">Ready to search?</p>
+      <p class="text-clover-100 mb-6">Browse 3,980+ licensed daycares in Georgia.</p>
+      <a
+        href="https://www.clovermap.com/Browse"
+        class="inline-block bg-white text-clover-700 font-semibold px-7 py-3 rounded-xl hover:bg-clover-50 transition-colors shadow-sm"
+      >
+        Search daycares on CloverMap →
+      </a>
+    </div>
+  </section>
+
+  <!-- ─── Footer ─────────────────────────────────────────────────────── -->
+  <footer class="border-t border-slate-100 bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+      <span>© {new Date().getFullYear()} CloverMap. All rights reserved.</span>
+      <div class="flex items-center gap-4">
+        <a href="https://www.clovermap.com/privacy" class="hover:text-slate-600 transition-colors">Privacy</a>
+        <a href="https://www.clovermap.com/terms" class="hover:text-slate-600 transition-colors">Terms</a>
+        <a href="https://www.clovermap.com" class="hover:text-slate-600 transition-colors">CloverMap.com</a>
+      </div>
+    </div>
+  </footer>
+</BaseLayout>

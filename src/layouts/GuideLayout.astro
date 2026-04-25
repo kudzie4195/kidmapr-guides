@@ -1,0 +1,388 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  state: string;
+  stateLabel: string;
+  icon: string;
+  timeEstimate: string;
+  lastUpdated: string;
+  isFree: boolean;
+  category: string;
+  relatedGuides?: string[];
+  faq?: Array<{ question: string; answer: string }>;
+  howToSteps?: Array<{ name: string; text: string }>;
+  canonical?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description,
+  state,
+  stateLabel,
+  icon,
+  timeEstimate,
+  lastUpdated,
+  isFree,
+  category,
+  relatedGuides,
+  faq,
+  howToSteps,
+  canonical,
+  ogImage,
+} = Astro.props;
+
+// Format lastUpdated as "Month YYYY"
+const updatedDate = new Date(lastUpdated);
+const updatedLabel = updatedDate.toLocaleDateString('en-US', {
+  month: 'long',
+  year: 'numeric',
+});
+
+// Breadcrumb short title (truncate at 40 chars)
+const shortTitle = title.length > 40 ? title.slice(0, 38) + '…' : title;
+
+// JSON-LD: BreadcrumbList
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: 'https://www.clovermap.com',
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Guides',
+      item: 'https://www.clovermap.com/guides',
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: stateLabel,
+      item: `https://www.clovermap.com/guides/${state}`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 4,
+      name: title,
+    },
+  ],
+};
+
+// JSON-LD: Article
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  dateModified: lastUpdated,
+  publisher: {
+    '@type': 'Organization',
+    name: 'CloverMap',
+    url: 'https://www.clovermap.com',
+  },
+};
+
+// JSON-LD: HowTo (conditional)
+const howToSchema = howToSteps
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'HowTo',
+      name: title,
+      step: howToSteps.map((s) => ({
+        '@type': 'HowToStep',
+        name: s.name,
+        text: s.text,
+      })),
+    }
+  : null;
+
+// JSON-LD: FAQPage (conditional)
+const faqSchema = faq
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    }
+  : null;
+
+// Category display label map
+const categoryLabels: Record<string, string> = {
+  childcare: 'Childcare',
+  'k-transition': 'K Transition',
+  financial: 'Financial',
+  provider: 'Provider',
+};
+---
+
+<BaseLayout {title} {description} {canonical} {ogImage}>
+  <!-- Structured data injected into <head> via slot -->
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+    {howToSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />
+    )}
+    {faqSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    )}
+  </Fragment>
+
+  <!-- Site Header -->
+  <header class="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <a href="https://www.clovermap.com" class="flex items-center gap-2 group">
+        <span class="text-xl" aria-hidden="true">🍀</span>
+        <span class="font-bold text-green-700 group-hover:text-green-800 transition-colors">
+          CloverMap
+        </span>
+        <span class="hidden sm:inline text-slate-300 mx-1">|</span>
+        <span class="hidden sm:inline text-xs text-slate-500 font-medium uppercase tracking-wide">
+          Guide Library
+        </span>
+      </a>
+      <a
+        href="https://www.clovermap.com"
+        class="text-sm text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        Back to CloverMap
+      </a>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <nav
+    aria-label="Breadcrumb"
+    class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3"
+  >
+    <ol class="flex flex-wrap items-center gap-1 text-xs text-slate-400">
+      <li>
+        <a href="https://www.clovermap.com" class="hover:text-slate-600 transition-colors">
+          Home
+        </a>
+      </li>
+      <li aria-hidden="true">/</li>
+      <li>
+        <a href="/guides" class="hover:text-slate-600 transition-colors">Guides</a>
+      </li>
+      <li aria-hidden="true">/</li>
+      <li>
+        <a href={`/guides/${state}`} class="hover:text-slate-600 transition-colors">
+          {stateLabel}
+        </a>
+      </li>
+      <li aria-hidden="true">/</li>
+      <li class="text-slate-500 font-medium truncate max-w-[200px]" aria-current="page">
+        {shortTitle}
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="bg-white border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <div class="max-w-3xl">
+        <div class="text-5xl mb-4" aria-hidden="true">{icon}</div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-3 leading-tight">
+          {title}
+        </h1>
+        <p class="text-slate-500 text-base sm:text-lg leading-relaxed mb-5">
+          {description}
+        </p>
+        <!-- Meta row -->
+        <div class="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+          <!-- Time estimate -->
+          <span class="flex items-center gap-1.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4 text-slate-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            {timeEstimate}
+          </span>
+          <!-- Last updated -->
+          <span class="flex items-center gap-1.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4 text-slate-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Updated {updatedLabel}
+          </span>
+          <!-- Free badge -->
+          {isFree && (
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Free
+            </span>
+          )}
+          <!-- Category badge -->
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+            {categoryLabels[category] ?? category}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content + Sidebar -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col lg:flex-row gap-10">
+      <!-- Body content -->
+      <article class="flex-1 min-w-0">
+        <div class="prose max-w-none">
+          <slot />
+        </div>
+
+        <!-- FAQ section (rendered from frontmatter) -->
+        {faq && faq.length > 0 && (
+          <section class="mt-10 border-t border-slate-100 pt-8">
+            <h2 class="text-lg font-bold text-slate-900 mb-5">Frequently Asked Questions</h2>
+            <dl class="space-y-5">
+              {faq.map((item) => (
+                <div>
+                  <dt class="font-semibold text-slate-800 mb-1">{item.question}</dt>
+                  <dd class="text-slate-500 text-sm leading-relaxed">{item.answer}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
+      </article>
+
+      <!-- Sidebar -->
+      <aside class="w-full lg:w-80 shrink-0">
+        <div class="sticky top-20 space-y-5">
+          <!-- In this guide (TOC placeholder — headings populated by JS or statically) -->
+          <div class="bg-white border border-slate-100 rounded-2xl p-5">
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              In this guide
+            </h2>
+            <p class="text-xs text-slate-400 italic">
+              Scroll to explore sections below.
+            </p>
+          </div>
+
+          <!-- Related guides -->
+          {relatedGuides && relatedGuides.length > 0 && (
+            <div class="bg-white border border-slate-100 rounded-2xl p-5">
+              <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                Related Guides
+              </h2>
+              <ul class="space-y-2">
+                {relatedGuides.map((slug) => (
+                  <li>
+                    <a
+                      href={`/guides/${slug}`}
+                      class="text-sm text-indigo-600 hover:text-indigo-800 hover:underline transition-colors flex items-center gap-1.5"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-3.5 h-3.5 shrink-0"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      {slug.split('/').pop()?.replace(/-/g, ' ')}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <!-- Back to CloverMap CTA -->
+          <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
+            <p class="text-sm font-semibold text-emerald-900 mb-1">Ready to search?</p>
+            <p class="text-xs text-emerald-700 mb-4 leading-relaxed">
+              Find licensed daycares near you in Georgia.
+            </p>
+            <a
+              href="https://www.clovermap.com"
+              class="block w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2.5 px-4 rounded-xl transition-colors"
+            >
+              Browse CloverMap →
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 text-slate-400 mt-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+      <p>
+        &copy; 2026 CloverMap &middot;{' '}
+        <a
+          href="https://www.clovermap.com"
+          class="hover:text-slate-200 transition-colors"
+        >
+          clovermap.com
+        </a>{' '}
+        &middot; For Georgia families
+      </p>
+      <nav class="flex items-center gap-4" aria-label="Footer navigation">
+        <a
+          href="https://www.clovermap.com/privacy"
+          class="hover:text-slate-200 transition-colors"
+        >
+          Privacy Policy
+        </a>
+        <a
+          href="https://www.clovermap.com/terms"
+          class="hover:text-slate-200 transition-colors"
+        >
+          Terms
+        </a>
+      </nav>
+    </div>
+  </footer>
+</BaseLayout>
