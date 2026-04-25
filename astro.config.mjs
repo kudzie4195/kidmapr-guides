@@ -2,7 +2,6 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
-import sitemap from '@astrojs/sitemap';
 
 /**
  * Astro config for kidmapr-guides
@@ -13,6 +12,9 @@ import sitemap from '@astrojs/sitemap';
  *
  * Proxy rule in vercel.json (base44_export):
  *   { "source": "/guides/:path*", "destination": "https://kidmapr-guides.netlify.app/guides/:path*" }
+ *
+ * Note: @astrojs/sitemap is omitted — it crashes with base: '/guides' in this
+ * version. Guide URLs are already included in the main clovermap.com sitemap.xml.
  */
 export default defineConfig({
   site: 'https://www.clovermap.com',
@@ -22,9 +24,5 @@ export default defineConfig({
     react(),
     tailwind(),
     mdx(),
-    sitemap({
-      // Sitemap is generated relative to site + base
-      filter: (page) => !page.includes('/drafts/'),
-    }),
   ],
 });
