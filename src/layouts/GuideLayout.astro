@@ -11,7 +11,7 @@ interface Props {
   lastUpdated: string;
   isFree: boolean;
   category: string;
-  relatedGuides?: string[];
+  relatedGuides?: Array<{ title: string; href: string; icon: string }>;
   faq?: Array<{ question: string; answer: string }>;
   howToSteps?: Array<{ name: string; text: string }>;
   canonical?: string;
@@ -311,10 +311,10 @@ const categoryLabels: Record<string, string> = {
                 Related Guides
               </h2>
               <ul class="space-y-2">
-                {relatedGuides.map((slug) => (
+                {relatedGuides.map((guide) => (
                   <li>
                     <a
-                      href={`/guides/${slug}`}
+                      href={guide.href}
                       class="text-sm text-indigo-600 hover:text-indigo-800 hover:underline transition-colors flex items-center gap-1.5"
                     >
                       <svg
@@ -330,7 +330,7 @@ const categoryLabels: Record<string, string> = {
                           clip-rule="evenodd"
                         />
                       </svg>
-                      {slug.split('/').pop()?.replace(/-/g, ' ')}
+                      <span>{guide.icon}</span> {guide.title}
                     </a>
                   </li>
                 ))}
