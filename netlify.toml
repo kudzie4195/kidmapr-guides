@@ -5,28 +5,6 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# ── Redirects ────────────────────────────────────────────────────────────────
-# Astro builds with base: '/guides', so all asset and page URLs in the HTML
-# are prefixed /guides/... but the actual dist files live without that prefix.
-# These rewrites let Netlify resolve them correctly on direct access.
-# (When proxied via Vercel, /guides is already stripped before hitting Netlify.)
-
-[[redirects]]
-  from   = "/guides/_astro/*"
-  to     = "/_astro/:splat"
-  status = 200
-  force  = true
-
-[[redirects]]
-  from   = "/guides/georgia/*"
-  to     = "/georgia/:splat"
-  status = 200
-
-[[redirects]]
-  from   = "/guides"
-  to     = "/"
-  status = 200
-
 # Security headers
 [[headers]]
   for = "/*"
