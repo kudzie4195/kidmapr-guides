@@ -5,9 +5,27 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Astro static output generates directory-based routing.
-# Each page lives at /guides/[state]/[slug]/index.html.
-# No SPA redirect needed — Netlify serves the index.html automatically.
+# ── Redirects ────────────────────────────────────────────────────────────────
+# Astro builds with base: '/guides', so all asset and page URLs in the HTML
+# are prefixed /guides/... but the actual dist files live without that prefix.
+# These rewrites let Netlify resolve them correctly on direct access.
+# (When proxied via Vercel, /guides is already stripped before hitting Netlify.)
+
+[[redirects]]
+  from   = "/guides/_astro/*"
+  to     = "/_astro/:splat"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/guides/georgia/*"
+  to     = "/georgia/:splat"
+  status = 200
+
+[[redirects]]
+  from   = "/guides"
+  to     = "/"
+  status = 200
 
 # Security headers
 [[headers]]
@@ -20,6 +38,6 @@
 
 # Long-cache for hashed assets
 [[headers]]
-  for = "/guides/_astro/*"
+  for = "/_astro/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
