@@ -18,6 +18,7 @@ import mdx from '@astrojs/mdx';
  */
 export default defineConfig({
   site: 'https://www.clovermap.com',
+  base: '/guides',
   output: 'static',
   integrations: [
     react(),
